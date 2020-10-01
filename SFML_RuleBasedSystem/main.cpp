@@ -10,6 +10,7 @@
 
 // A GLOBAL!!! 
 bool grid[GRID_SIZE_Y][GRID_SIZE_X] = { false };
+bool gridTemp[GRID_SIZE_Y][GRID_SIZE_X] = { false };
 
 /* Rule 1
  * Random Movement
@@ -69,6 +70,19 @@ void random_movement()
 	}
 }
 
+void swapArrays()
+{
+	bool la[GRID_SIZE_Y][GRID_SIZE_X] = { false };
+
+	bool* temp[GRID_SIZE_Y][GRID_SIZE_X]  = la;
+	//double* grid = array_two;
+
+	//double* swap = left;
+	//left = right;
+	//right = swap;
+
+}
+
 /* Rule 2
  * Grow
  * Goes through every square, calculates the number of valid neighbours and either
@@ -82,22 +96,54 @@ void grow()
 		for (int x = 0; x < GRID_SIZE_X; x++)
 		{
 			// Calculate the number of neighboring nodes
-			int number_of_neighbours = 0;
-			if (y > 0 && grid[y - 1][x])
-				number_of_neighbours++;
-			if (x > 0 && grid[y][x - 1])
-				number_of_neighbours++;
-			if (x < GRID_SIZE_X - 1 && grid[y][x + 1])
-				number_of_neighbours++;
-			if (y < GRID_SIZE_Y - 1 && grid[y + 1][x])
-				number_of_neighbours++;
+			//int number_of_neighbours = 0;
+			//if (y > 0 && grid[y - 1][x])
+			//	number_of_neighbours++;
+			//if (x > 0 && grid[y][x - 1])
+			//	number_of_neighbours++;
+			//if (x < GRID_SIZE_X - 1 && grid[y][x + 1])
+			//	number_of_neighbours++;
+			//if (y < GRID_SIZE_Y - 1 && grid[y + 1][x])
+			//	number_of_neighbours++;
 
-			// If we have more than one neighbour
-			if (number_of_neighbours > 1)
+			int number_of_neighbours = 0;
+
+			// above
+			if (y < GRID_SIZE_Y - 1 && grid[y + 1][x]) number_of_neighbours++;
+			// top left
+			if (y < GRID_SIZE_Y - 1 && x > 0 && grid[y + 1][x - 1]) number_of_neighbours++;
+			// left
+			if (x > 0 && grid[y][x - 1]) number_of_neighbours++;
+			// bottom left
+			if (x > 0 && y > 0 && grid[y - 1][x - 1]) number_of_neighbours++;
+			// bottom
+			if (y > 0 && grid[y - 1][x]) number_of_neighbours++;
+			// bottom right
+			if (x < GRID_SIZE_X - 1 && y > 0 && grid[y - 1][x + 1]) number_of_neighbours++;
+			// right
+			if (x < GRID_SIZE_X - 1 && grid[y][x + 1]) number_of_neighbours++;
+			// top right
+			if (x < GRID_SIZE_X - 1 && y < GRID_SIZE_Y - 1 && grid[y + 1][x + 1]) number_of_neighbours++;
+
+			// For a space that is 'populated':
+			if (grid[y][x])
 			{
-				// If there is a node at the position, kill it
-				// If there is not a node at the position, spawn one
-				grid[y][x] = grid[y][x] ? false : true;
+				// Each cell with one or no neighbours dies, as if by solitude.
+				// Each cell with four or more neighbours dies, as if by overpopulation.
+				if (number_of_neighbours <= 1 || number_of_neighbours >= 4)
+				{
+					grid[y][x] = false;
+				}
+
+				// Each cell with two or three neighbours survives.
+				continue;
+			}
+
+			// For a space that is 'empty' or 'unpopulated'
+			// Each cell with three neighbours becomes populated.
+			if (number_of_neighbours == 3)
+			{
+				grid[y][x] = true;
 			}
 		}
 	}
@@ -106,7 +152,7 @@ void grow()
 void run_rules()
 {
 	// Run the rules
-	random_movement();
+	// random_movement();
 	grow();
 }
 
