@@ -89,6 +89,8 @@ void updateGridArray()
  */
 void grow()
 {
+	int occupiedCount = 0;
+
 	// Go through every item in our grid
 	for (int y = 0; y < GRID_SIZE_Y; y++)
 	{
@@ -117,12 +119,14 @@ void grow()
 			if (grid[y][x])
 			{
 				gridTemp[y][x] = true;
+				occupiedCount++;
 
 				// Each cell with one or no neighbours dies, as if by solitude.
 				// Each cell with four or more neighbours dies, as if by overpopulation.
 				if (number_of_neighbours <= 1 || number_of_neighbours >= 4)
 				{
 					gridTemp[y][x] = false;
+					occupiedCount--;
 				}
 
 				// Each cell with two or three neighbours survives.
@@ -134,6 +138,30 @@ void grow()
 			if (number_of_neighbours == 3)
 			{
 				gridTemp[y][x] = true;
+				occupiedCount++;
+			}
+		}
+	}
+
+	// If over 75% of the cells are occupied, kill half of them
+	float occupancy = ((GRID_SIZE_Y * GRID_SIZE_X) / 100) * occupiedCount;
+	
+	if (occupancy > 75)
+	{
+		int marker = 0;
+
+		for (int y = 0; y < GRID_SIZE_Y; y++)
+		{
+			for (int x = 0; x < GRID_SIZE_X; x++)
+			{
+				if (gridTemp[x][y])
+				{
+					marker++;
+					if (marker % 2 == 0)
+					{
+						gridTemp[x][y] = false;
+					}
+				}
 			}
 		}
 	}
@@ -147,6 +175,35 @@ void run_rules()
 	// random_movement();
 	grow();
 }
+
+void randomDeathOrSpawn(bool death = false)
+{
+	std::vector<sf::Vector2i> availableCells;
+
+	for (int y = 0; y < GRID_SIZE_Y; y++)
+	{
+		for (int x = 0; x < GRID_SIZE_X; x++)
+		{
+			if ((!death && !grid[y][x]) || (death && grid[y][x]))
+			{
+				availableCells.push_back(sf::Vector2i(x, y));
+			}
+		}
+	}
+
+	if (availableCells.size() > 0)
+	{
+		auto randomCell = availableCells[availableCells.size() == 1 ? 0 : rand() % (availableCells.size() - 1)];
+
+		grid[randomCell.y][randomCell.x] = !death;
+	}
+}
+
+void kull()
+{
+
+}
+
 
 int main()
 {
@@ -186,6 +243,20 @@ int main()
 	sf::Clock clock;
 	float elapsed = 0.0f;
 
+	// game cycles
+	int cycleCount = 0;
+
+	for (int y = 0; y < GRID_SIZE_Y; y++)
+	{
+		for (int x = 0; x < GRID_SIZE_X; x++)
+		{
+
+					grid[x][y] = true;
+				
+			
+		}
+	}
+
 	// While the window is open, update
 	while (window.isOpen())
 	{
@@ -224,7 +295,18 @@ int main()
 			elapsed = 0.0f;
 			if (event_playing)
 			{
+				cycleCount++;
 				run_rules();
+
+				if (cycleCount % 6 == 0)
+				{
+					randomDeathOrSpawn(true);
+				}
+
+				if (cycleCount % 5 == 0)
+				{
+					randomDeathOrSpawn();
+				}
 			}
 		}
 
