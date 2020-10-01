@@ -70,17 +70,16 @@ void random_movement()
 	}
 }
 
-void swapArrays()
+void updateGridArray()
 {
-	bool la[GRID_SIZE_Y][GRID_SIZE_X] = { false };
-
-	bool* temp[GRID_SIZE_Y][GRID_SIZE_X]  = la;
-	//double* grid = array_two;
-
-	//double* swap = left;
-	//left = right;
-	//right = swap;
-
+	for (int y = 0; y < GRID_SIZE_Y; y++)
+	{
+		for (int x = 0; x < GRID_SIZE_X; x++)
+		{
+			grid[y][x] = gridTemp[y][x];
+			gridTemp[y][x] = false;
+		}
+	}
 }
 
 /* Rule 2
@@ -95,17 +94,6 @@ void grow()
 	{
 		for (int x = 0; x < GRID_SIZE_X; x++)
 		{
-			// Calculate the number of neighboring nodes
-			//int number_of_neighbours = 0;
-			//if (y > 0 && grid[y - 1][x])
-			//	number_of_neighbours++;
-			//if (x > 0 && grid[y][x - 1])
-			//	number_of_neighbours++;
-			//if (x < GRID_SIZE_X - 1 && grid[y][x + 1])
-			//	number_of_neighbours++;
-			//if (y < GRID_SIZE_Y - 1 && grid[y + 1][x])
-			//	number_of_neighbours++;
-
 			int number_of_neighbours = 0;
 
 			// above
@@ -128,11 +116,13 @@ void grow()
 			// For a space that is 'populated':
 			if (grid[y][x])
 			{
+				gridTemp[y][x] = true;
+
 				// Each cell with one or no neighbours dies, as if by solitude.
 				// Each cell with four or more neighbours dies, as if by overpopulation.
 				if (number_of_neighbours <= 1 || number_of_neighbours >= 4)
 				{
-					grid[y][x] = false;
+					gridTemp[y][x] = false;
 				}
 
 				// Each cell with two or three neighbours survives.
@@ -143,10 +133,12 @@ void grow()
 			// Each cell with three neighbours becomes populated.
 			if (number_of_neighbours == 3)
 			{
-				grid[y][x] = true;
+				gridTemp[y][x] = true;
 			}
 		}
 	}
+
+	updateGridArray();
 }
 
 void run_rules()
